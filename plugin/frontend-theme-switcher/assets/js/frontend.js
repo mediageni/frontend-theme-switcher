@@ -1,7 +1,7 @@
 /**
  * Keeps theme menu scripts from intercepting the native switcher controls.
  *
- * @package ScriptGeni_Frontend_Theme_Switcher
+ * @package MediaGeni_Frontend_Theme_Switcher
  */
 
 ( function () {

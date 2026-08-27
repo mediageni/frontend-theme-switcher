@@ -1,19 +1,19 @@
 <?php
 /**
- * Plugin Name:       ScriptGeni Frontend Theme Switcher
- * Plugin URI:        https://scriptgeni.com/
+ * Plugin Name:       MediaGeni Frontend Theme Switcher
+ * Plugin URI:        https://mediageni.com/
  * Description:       Let visitors preview approved installed themes without changing the site's active theme.
  * Version:           1.0.0
  * Requires at least: 6.4
  * Requires PHP:      7.4
- * Author:            ScriptGeni
- * Author URI:        https://scriptgeni.com/
+ * Author:            MediaGeni
+ * Author URI:        https://mediageni.com/
  * Text Domain:       frontend-theme-switcher
  * Domain Path:       /languages
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package ScriptGeni_Frontend_Theme_Switcher
+ * @package MediaGeni_Frontend_Theme_Switcher
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

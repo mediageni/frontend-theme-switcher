@@ -1,4 +1,4 @@
-# ScriptGeni Frontend Theme Switcher
+# MediaGeni Frontend Theme Switcher
 
 A standalone WordPress plugin that lets frontend visitors preview approved installed themes without changing the site's globally active theme.
 

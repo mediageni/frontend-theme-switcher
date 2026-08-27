@@ -2,7 +2,7 @@
 /**
  * Public plugin runtime.
  *
- * @package ScriptGeni_Frontend_Theme_Switcher
+ * @package MediaGeni_Frontend_Theme_Switcher
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -454,7 +454,7 @@ final class SGFTS_Plugin {
 		}
 
 		$target_url = remove_query_arg( self::QUERY_VAR );
-		wp_safe_redirect( $target_url, 302, 'ScriptGeni Frontend Theme Switcher' );
+		wp_safe_redirect( $target_url, 302, 'MediaGeni Frontend Theme Switcher' );
 		exit;
 	}
 

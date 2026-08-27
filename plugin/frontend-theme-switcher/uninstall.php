@@ -2,7 +2,7 @@
 /**
  * Optional settings cleanup.
  *
- * @package ScriptGeni_Frontend_Theme_Switcher
+ * @package MediaGeni_Frontend_Theme_Switcher
  */
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
