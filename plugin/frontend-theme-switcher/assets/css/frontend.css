@@ -1,0 +1,402 @@
+/**
+ * ScriptGeni Frontend Theme Switcher
+ *
+ * Table of contents
+ * 1. Navigation placement
+ * 2. Switcher trigger
+ * 3. Theme panel
+ * 4. Navigation fallback
+ * 5. Responsive adjustments
+ */
+
+/* 1. Navigation placement
+--------------------------------------------- */
+.sgfts-menu-item,
+.sgfts-switcher-wrap {
+	box-sizing: border-box;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+
+.sgfts-menu-item *,
+.sgfts-switcher-wrap * {
+	box-sizing: border-box;
+}
+
+.sgfts-menu-item {
+	display: flex;
+	align-items: center;
+}
+
+@media (max-width: 1500px) {
+	.sgfts-menu-item .sgfts-switcher__label {
+		display: none;
+	}
+}
+
+/* 2. Switcher trigger
+--------------------------------------------- */
+.sgfts-switcher {
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: 1.2;
+	position: relative;
+}
+
+.sgfts-switcher__summary {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	min-height: 2.5rem;
+	padding: 0.58rem 0.78rem;
+	background: transparent;
+	border: 1px solid rgba(127, 127, 127, 0.32);
+	border-radius: 999px;
+	color: inherit;
+	cursor: pointer;
+	font: inherit;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.sgfts-switcher__summary::-webkit-details-marker {
+	display: none;
+}
+
+.sgfts-switcher__summary::marker {
+	content: "";
+}
+
+.sgfts-switcher__summary::after {
+	width: 0.42rem;
+	height: 0.42rem;
+	border-right: 1.5px solid currentColor;
+	border-bottom: 1.5px solid currentColor;
+	content: "";
+	transform: rotate(45deg) translateY(-0.12rem);
+	transition: transform 160ms ease;
+}
+
+.sgfts-switcher[open] > .sgfts-switcher__summary::after {
+	transform: rotate(225deg) translate(-0.08rem, -0.08rem);
+}
+
+.sgfts-switcher__summary:hover {
+	background: rgba(127, 127, 127, 0.09);
+}
+
+.sgfts-switcher__summary:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+.sgfts-switcher__icon {
+	font-size: 1.05em;
+	line-height: 1;
+}
+
+.sgfts-switcher__current {
+	font-weight: 400;
+	opacity: 0.72;
+}
+
+/* 3. Theme panel
+--------------------------------------------- */
+.sgfts-switcher__panel {
+	display: none !important;
+	position: absolute !important;
+	top: calc(100% + 0.65rem) !important;
+	right: 0 !important;
+	left: auto !important;
+	z-index: 100000 !important;
+	width: min(19rem, calc(100vw - 2rem)) !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0.65rem !important;
+	transform: none !important;
+	background: var(--wp--preset--color--base, #fff) !important;
+	border: 1px solid rgba(127, 127, 127, 0.24) !important;
+	border-radius: 1rem !important;
+	box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.16) !important;
+	color: var(--wp--preset--color--contrast, #1d2327) !important;
+	opacity: 1 !important;
+	overflow: visible !important;
+	pointer-events: auto !important;
+	visibility: visible !important;
+}
+
+.sgfts-switcher[open] > .sgfts-switcher__panel {
+	display: block !important;
+}
+
+.sgfts-switcher__heading {
+	display: block !important;
+	position: static !important;
+	width: auto !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0.45rem 0.55rem 0.6rem !important;
+	transform: none !important;
+	background: transparent !important;
+	border: 0 !important;
+	color: inherit !important;
+	font: inherit !important;
+	font-size: 0.74rem !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.08em !important;
+	line-height: 1.3 !important;
+	opacity: 0.62 !important;
+	visibility: visible !important;
+	text-align: left !important;
+	text-transform: uppercase !important;
+}
+
+.sgfts-switcher__options {
+	display: grid !important;
+	position: static !important;
+	float: none !important;
+	grid-template-columns: minmax(0, 1fr) !important;
+	gap: 0.2rem !important;
+	width: 100% !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	transform: none !important;
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	list-style: none !important;
+	opacity: 1 !important;
+	overflow: visible !important;
+	pointer-events: auto !important;
+	visibility: visible !important;
+}
+
+.sgfts-switcher__option {
+	display: block !important;
+	position: static !important;
+	float: none !important;
+	width: auto !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	transform: none !important;
+	background: transparent !important;
+	border: 0 !important;
+	list-style: none !important;
+	opacity: 1 !important;
+	pointer-events: auto !important;
+	visibility: visible !important;
+}
+
+.sgfts-switcher__link {
+	display: grid !important;
+	position: relative !important;
+	float: none !important;
+	grid-template-columns: minmax(0, 1fr) auto auto !important;
+	align-items: center !important;
+	gap: 0.55rem !important;
+	width: 100% !important;
+	min-width: 0 !important;
+	max-width: none !important;
+	height: auto !important;
+	min-height: 2.75rem !important;
+	margin: 0 !important;
+	padding: 0.58rem 0.62rem !important;
+	transform: none !important;
+	border: 0 !important;
+	border-radius: 0.68rem !important;
+	box-shadow: none !important;
+	color: inherit !important;
+	font: inherit !important;
+	line-height: 1.25 !important;
+	opacity: 1 !important;
+	pointer-events: auto !important;
+	visibility: visible !important;
+	text-align: left !important;
+	text-decoration: none !important;
+}
+
+.sgfts-switcher__link:hover,
+.sgfts-switcher__link:focus-visible,
+.sgfts-switcher__link[aria-current="true"] {
+	background: rgba(127, 127, 127, 0.11) !important;
+	color: inherit !important;
+	text-decoration: none !important;
+}
+
+.sgfts-switcher__link:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: -2px;
+}
+
+.sgfts-switcher__name {
+	display: block !important;
+	position: static !important;
+	min-width: 0 !important;
+	transform: none !important;
+	font: inherit !important;
+	font-weight: 650 !important;
+	line-height: 1.25 !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	overflow-wrap: anywhere !important;
+}
+
+.sgfts-switcher__type {
+	display: block !important;
+	position: static !important;
+	width: auto !important;
+	height: auto !important;
+	margin: 0 !important;
+	padding: 0.2rem 0.42rem !important;
+	transform: none !important;
+	background: rgba(127, 127, 127, 0.12) !important;
+	border: 0 !important;
+	border-radius: 999px !important;
+	font: inherit !important;
+	font-size: 0.68rem !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.04em !important;
+	line-height: 1.2 !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	text-transform: uppercase !important;
+}
+
+.sgfts-switcher__check {
+	display: block !important;
+	position: static !important;
+	width: 1rem !important;
+	transform: none !important;
+	font: inherit !important;
+	font-weight: 700 !important;
+	line-height: 1 !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	text-align: center !important;
+}
+
+/* 4. Navigation fallback
+--------------------------------------------- */
+.sgfts-navigation-fallback {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	position: fixed;
+	top: 1rem;
+	right: 1rem;
+	z-index: 100000;
+	padding: 0.35rem;
+	background: var(--wp--preset--color--base, #fff);
+	border: 1px solid rgba(127, 127, 127, 0.2);
+	border-radius: 999px;
+	box-shadow: 0 0.55rem 1.8rem rgba(0, 0, 0, 0.1);
+	color: var(--wp--preset--color--contrast, #1d2327);
+	font-family: inherit;
+	font-size: 0.9rem;
+	line-height: 1.2;
+}
+
+.sgfts-navigation-fallback *,
+.sgfts-navigation-fallback *::before,
+.sgfts-navigation-fallback *::after {
+	box-sizing: border-box;
+}
+
+.sgfts-navigation-fallback__menu {
+	display: flex;
+	align-items: center;
+	gap: 0.9rem;
+	margin: 0;
+	padding: 0 0.35rem 0 0.7rem;
+	list-style: none;
+}
+
+.sgfts-navigation-fallback__menu li {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.sgfts-navigation-fallback__menu a {
+	color: inherit;
+	font: inherit;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.sgfts-navigation-fallback__menu a:hover,
+.sgfts-navigation-fallback__menu a:focus-visible {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.sgfts-navigation-fallback__menu .sub-menu {
+	display: none;
+	position: absolute;
+	top: 100%;
+	right: 0;
+	min-width: 12rem;
+	margin: 0;
+	padding: 0.7rem;
+	background: var(--wp--preset--color--base, #fff);
+	border: 1px solid rgba(127, 127, 127, 0.2);
+	border-radius: 0.75rem;
+	box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.12);
+	list-style: none;
+}
+
+.sgfts-navigation-fallback__menu li:hover > .sub-menu,
+.sgfts-navigation-fallback__menu li:focus-within > .sub-menu {
+	display: grid;
+	gap: 0.6rem;
+}
+
+body.admin-bar .sgfts-navigation-fallback {
+	top: calc(32px + 1rem);
+}
+
+/* 5. Responsive adjustments
+--------------------------------------------- */
+@media (max-width: 700px) {
+	.sgfts-switcher__current {
+		display: none;
+	}
+
+	.sgfts-switcher__panel {
+		right: auto !important;
+		left: 50% !important;
+		transform: translateX(-50%) !important;
+	}
+
+	.sgfts-navigation-fallback .sgfts-switcher__panel {
+		right: 0 !important;
+		left: auto !important;
+		transform: none !important;
+	}
+
+	.sgfts-navigation-fallback__menu {
+		display: none;
+	}
+}
+
+@media (max-width: 782px) {
+	body.admin-bar .sgfts-navigation-fallback {
+		top: calc(46px + 1rem);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sgfts-switcher__summary::after {
+		transition: none;
+	}
+}

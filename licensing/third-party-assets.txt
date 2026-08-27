@@ -1,0 +1,6 @@
+Third-party assets
+==================
+
+This item contains no third-party libraries, fonts, images, scripts, stylesheets,
+or remote services. It uses only WordPress Core APIs and one Unicode interface
+symbol.

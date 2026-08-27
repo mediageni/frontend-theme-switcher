@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Installation, configuration, usage, privacy, caching, and support documentation for ScriptGeni Frontend Theme Switcher.">
+	<title>ScriptGeni Frontend Theme Switcher Documentation</title>
+	<link rel="stylesheet" href="assets/documentation.css">
+</head>
+<body>
+	<header class="docs-hero">
+		<div class="docs-container">
+			<p class="docs-eyebrow">ScriptGeni WordPress plugin</p>
+			<h1>Frontend Theme Switcher</h1>
+			<p class="docs-lead">Let each visitor preview approved installed themes without changing the site's active theme.</p>
+			<p class="docs-version">Documentation for version 1.0.0 · Updated 27 August 2026</p>
+		</div>
+	</header>
+
+	<div class="docs-layout docs-container">
+		<nav class="docs-nav" aria-label="Documentation sections">
+			<a href="#requirements">Requirements</a>
+			<a href="#installation">Installation</a>
+			<a href="#configuration">Configuration</a>
+			<a href="#usage">Visitor experience</a>
+			<a href="#placement">Placement</a>
+			<a href="#caching">Caching</a>
+			<a href="#privacy">Privacy</a>
+			<a href="#uninstall">Uninstall</a>
+			<a href="#troubleshooting">Troubleshooting</a>
+			<a href="#credits">Credits</a>
+		</nav>
+
+		<main class="docs-content">
+			<section id="requirements">
+				<h2>Requirements</h2>
+				<ul>
+					<li>WordPress 6.4 or newer.</li>
+					<li>PHP 7.4 or newer.</li>
+					<li>At least two installed, working WordPress themes for a useful preview.</li>
+					<li>Administrator access to choose which themes are publicly available.</li>
+				</ul>
+			</section>
+
+			<section id="installation">
+				<h2>Installation</h2>
+				<ol>
+					<li>Sign in to WordPress as an administrator.</li>
+					<li>Open <strong>Plugins → Add New Plugin → Upload Plugin</strong>.</li>
+					<li>Select <code>frontend-theme-switcher.zip</code>, install it, and activate it.</li>
+					<li>Open <strong>Settings → Theme Switcher</strong>.</li>
+				</ol>
+				<p>Activation does not change the site's current theme.</p>
+			</section>
+
+			<section id="configuration">
+				<h2>Configuration</h2>
+				<h3>Available themes</h3>
+				<p>Select only themes that visitors may preview. Every selected theme must already be installed and free of WordPress theme errors. Test its menus, widgets, templates, and plugin layouts before enabling it publicly. When an approved child theme exists, the plugin hides its parent theme from the public list while WordPress continues to load that parent internally.</p>
+				<h3>Automatic placement</h3>
+				<p>Select one conventional WordPress menu as the shared top navigation. Classic preview themes receive that menu in their header locations without changing their saved theme settings. Block themes continue to render their native Navigation block. When enabled, the switcher is appended after the first frontend navigation.</p>
+				<p>If a selected theme renders no usable WordPress navigation, a compact fixed top navigation displays the same menu links and switcher so the visitor can always move around the demo or switch back.</p>
+				<h3>Data removal</h3>
+				<p>Settings are preserved during deactivation. Enable <strong>Delete plugin settings when the plugin is uninstalled</strong> only when you want uninstalling the plugin to remove its settings permanently.</p>
+			</section>
+
+			<section id="usage">
+				<h2>Visitor experience</h2>
+				<p>The switcher uses an accessible native disclosure control. A tiny dependency-free script prevents third-party theme menu scripts from intercepting its controls. A visitor opens it, selects a theme, and returns to the same clean URL rendered with that theme.</p>
+				<p>The selection is stored in the functional <code>sgfts_theme</code> cookie for up to 30 days. Selecting the site-default theme removes the cookie. One visitor's selection never activates a theme globally and does not affect other visitors.</p>
+			</section>
+
+			<section id="placement">
+				<h2>Manual placement</h2>
+				<p>If the theme uses a custom header that does not render a standard WordPress navigation, disable automatic placement and add this shortcode where the switcher should appear:</p>
+				<pre><code>[frontend_theme_switcher]</code></pre>
+				<p>You can use a Shortcode block in the Site Editor, a page builder shortcode element, or a widget area that processes shortcodes.</p>
+			</section>
+
+			<section id="caching">
+				<h2>Caching</h2>
+				<p>Visitor-specific theme pages define the WordPress <code>DONOTCACHEPAGE</code> constant and send no-cache headers. Most WordPress page-cache plugins respect these signals.</p>
+				<div class="docs-notice">
+					<strong>Reverse proxy or CDN:</strong> if a cache ignores WordPress headers, configure it to bypass full-page caching whenever the <code>sgfts_theme</code> cookie is present. Never cache an alternative-theme response as the shared public page.
+				</div>
+			</section>
+
+			<section id="privacy">
+				<h2>Privacy</h2>
+				<p>The plugin stores only an installed theme's stylesheet identifier in a first-party functional cookie. It does not collect personal data, use analytics, load remote assets, or transmit information to ScriptGeni or another external service.</p>
+				<p>WordPress adds suggested disclosure text under <strong>Settings → Privacy</strong>. Review it against the website's own legal requirements.</p>
+			</section>
+
+			<section id="uninstall">
+				<h2>Deactivation and uninstall</h2>
+				<p>Deactivation preserves all settings. Visitor cookies are ignored while the plugin is inactive. Uninstall removes settings only on sites where the administrator explicitly enabled the data-removal option.</p>
+			</section>
+
+			<section id="troubleshooting">
+				<h2>Troubleshooting</h2>
+				<h3>The switcher is not in the header</h3>
+				<p>The theme may use a hard-coded or builder-specific header instead of a standard WordPress navigation. Use the shortcode in that header's shortcode or HTML-capable element.</p>
+				<h3>The wrong visitor sees a selected theme</h3>
+				<p>This indicates shared HTML caching. Purge the page cache and configure the cache to bypass requests containing the <code>sgfts_theme</code> cookie.</p>
+				<h3>A selected theme looks incomplete</h3>
+				<p>Each theme owns its menus, widget areas, Site Editor templates, Customizer settings, and theme modifications. Configure that theme before exposing it, or remove it from the allowed list.</p>
+				<h3>A removed theme was selected previously</h3>
+				<p>The plugin rejects unavailable or unapproved themes, removes the stale preference, and falls back to the site's active theme.</p>
+			</section>
+
+			<section id="credits">
+				<h2>Credits and licensing</h2>
+				<p>ScriptGeni Frontend Theme Switcher is licensed under GPL-2.0-or-later. It contains no third-party libraries, fonts, images, or remote services. WordPress and its trademarks belong to the WordPress Foundation and their respective owners.</p>
+			</section>
+		</main>
+	</div>
+
+	<footer class="docs-footer">
+		<div class="docs-container">© 2026 ScriptGeni</div>
+	</footer>
+</body>
+</html>
