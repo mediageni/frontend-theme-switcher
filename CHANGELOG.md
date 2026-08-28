@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1 - 2026-08-28
+
+- Protected the switcher control from late-loading theme CSS resets, including Salient's global `summary` reset.
+- Reset conflicting Salient Core icon styles inside Twenty Twenty-One submenu controls.
+- Kept the Twenty Twenty-One header compact at tablet-sized desktop navigation widths.
+
 ## 1.0.0 - 2026-08-27
 
 - Initial frontend visitor theme switcher.

@@ -4,7 +4,7 @@ Tags: theme switcher, theme preview, frontend, demo, showcase
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,12 @@ The stored preference is rejected and removed. WordPress continues with the site
 When a visitor chooses a preview theme, the plugin stores the selected theme identifier in the `sgfts_theme` functional cookie for up to 30 days. The preference is used only to render the site for that visitor. No personal data is collected or transmitted.
 
 == Changelog ==
+
+= 1.0.1 =
+
+* Protected the switcher control from late-loading theme CSS resets.
+* Prevented Salient Core icon styles from distorting Twenty Twenty-One submenu controls during previews.
+* Kept the Twenty Twenty-One header compact at tablet-sized desktop navigation widths.
 
 = 1.0.0 =
 
