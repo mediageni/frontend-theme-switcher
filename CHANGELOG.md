@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2 - 2026-08-28
+
+- Loaded the selected preview theme's own Customizer settings while leaving the globally active theme unchanged.
+- Fixed theme-specific logo, title, tagline, color, and related theme-mod choices inheriting from the active theme during previews.
+
 ## 1.0.1 - 2026-08-28
 
 - Protected the switcher control from late-loading theme CSS resets, including Salient's global `summary` reset.

@@ -4,7 +4,7 @@ Tags: theme switcher, theme preview, frontend, demo, showcase
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,6 +23,7 @@ Features:
 * One shared top navigation menu across classic theme previews.
 * Shortcode fallback: `[frontend_theme_switcher]`.
 * Support for parent themes, child themes, block themes, and classic themes.
+* Each preview uses its own Customizer settings without changing the globally active theme.
 * Automatic parent-theme hiding when an approved child theme is available.
 * Clean URLs after a theme selection.
 * No-cache headers for visitor-specific preview responses.
@@ -65,6 +66,10 @@ The stored preference is rejected and removed. WordPress continues with the site
 When a visitor chooses a preview theme, the plugin stores the selected theme identifier in the `sgfts_theme` functional cookie for up to 30 days. The preference is used only to render the site for that visitor. No personal data is collected or transmitted.
 
 == Changelog ==
+
+= 1.0.2 =
+
+* Loaded each preview theme's own Customizer settings, including logo and header-display choices.
 
 = 1.0.1 =
 

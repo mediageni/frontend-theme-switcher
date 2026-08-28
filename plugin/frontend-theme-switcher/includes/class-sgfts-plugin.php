@@ -219,6 +219,7 @@ final class SGFTS_Plugin {
 
 		add_filter( 'stylesheet', array( $this, 'filter_stylesheet' ), 1 );
 		add_filter( 'template', array( $this, 'filter_template' ), 1 );
+		add_filter( 'pre_option_theme_mods_' . $this->default_stylesheet, array( $this, 'filter_theme_mods' ) );
 
 		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
 			define( 'DONOTCACHEPAGE', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Standard page-cache compatibility constant.
@@ -432,6 +433,27 @@ final class SGFTS_Plugin {
 	 */
 	public function filter_stylesheet( $stylesheet ) {
 		return $this->selected_stylesheet ? $this->selected_stylesheet : $stylesheet;
+	}
+
+	/**
+	 * Loads Customizer settings from the visitor's selected preview theme.
+	 *
+	 * WordPress resolves theme mods from the globally active stylesheet option,
+	 * even when the template and stylesheet filters select another theme. This
+	 * keeps logos, colors, header choices, and other theme settings aligned with
+	 * the visitor's preview without changing the site's active theme.
+	 *
+	 * @param mixed $pre_option Existing short-circuit value.
+	 * @return mixed
+	 */
+	public function filter_theme_mods( $pre_option ) {
+		if ( ! $this->selected_stylesheet ) {
+			return $pre_option;
+		}
+
+		$theme_mods = get_option( 'theme_mods_' . $this->selected_stylesheet, array() );
+
+		return is_array( $theme_mods ) ? $theme_mods : array();
 	}
 
 	/**
