@@ -87,6 +87,8 @@ When a visitor chooses a preview theme, the plugin stores only that installed th
 * Preserved each theme's own navigation unless an administrator explicitly selects a shared menu.
 * Added everyone or administrators-only access and configurable cookie duration.
 * Added list and select layouts to the existing shortcode.
+* Anchored each compact panel to its own control instead of the surrounding content width.
+* Replaced pill-shaped controls with restrained, theme-neutral corners and shadows.
 * Kept the automatic control reachable in separate desktop and mobile menus.
 * Made the select layout work as a standard form without JavaScript.
 * Stopped new activations from exposing every installed theme before configuration.
