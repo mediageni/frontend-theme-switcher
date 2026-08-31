@@ -1,5 +1,5 @@
-=== MediaGeni Frontend Theme Switcher ===
-Contributors: mediageni
+=== Frontend Theme Switcher - Visitor Theme Preview ===
+Contributors: vidaldewit
 Tags: theme switcher, theme preview, frontend, demo, showcase
 Requires at least: 6.4
 Tested up to: 7.1
@@ -12,7 +12,7 @@ Let visitors preview approved installed themes without changing the site's activ
 
 == Description ==
 
-MediaGeni Frontend Theme Switcher adds an accessible theme selector after the first frontend navigation menu. Each visitor's choice is stored in a functional cookie and applies only to that visitor.
+Frontend Theme Switcher by MediaGeni adds an accessible theme selector after the first frontend navigation menu. Each visitor's choice is stored in a functional cookie and applies only to that visitor.
 
 The plugin does not activate themes globally, transmit data, load third-party assets, or expose unapproved themes. Administrators choose which installed themes are available under Settings > Theme Switcher.
 
@@ -30,10 +30,12 @@ Features:
 * Keyboard-accessible native details control.
 * Tiny dependency-free interaction guard and no external services.
 
+Development takes place in the public [GitHub repository](https://github.com/mediageni/frontend-theme-switcher), where the complete human-readable source is available.
+
 == Installation ==
 
 1. Upload the `frontend-theme-switcher` folder to `/wp-content/plugins/` or install its ZIP through Plugins > Add New.
-2. Activate MediaGeni Frontend Theme Switcher.
+2. Activate Frontend Theme Switcher.
 3. Open Settings > Theme Switcher.
 4. Select the installed themes visitors may preview.
 5. Select the WordPress menu used as shared top navigation.

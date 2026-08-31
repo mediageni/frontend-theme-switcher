@@ -476,7 +476,7 @@ final class SGFTS_Plugin {
 		}
 
 		$target_url = remove_query_arg( self::QUERY_VAR );
-		wp_safe_redirect( $target_url, 302, 'MediaGeni Frontend Theme Switcher' );
+		wp_safe_redirect( $target_url, 302, 'Frontend Theme Switcher' );
 		exit;
 	}
 
