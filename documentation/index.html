@@ -13,7 +13,7 @@
 			<p class="docs-eyebrow">MediaGeni WordPress plugin</p>
 			<h1>Frontend Theme Switcher</h1>
 			<p class="docs-lead">Let each visitor preview approved installed themes without changing the site's active theme.</p>
-			<p class="docs-version">Documentation for version 1.0.2 · Updated 28 August 2026</p>
+			<p class="docs-version">Documentation for version 1.1.0 · Updated 31 August 2026</p>
 		</div>
 	</header>
 
@@ -57,9 +57,10 @@
 				<h2>Configuration</h2>
 				<h3>Available themes</h3>
 				<p>Select only themes that visitors may preview. Every selected theme must already be installed and free of WordPress theme errors. Test its menus, widgets, templates, and plugin layouts before enabling it publicly. Each preview uses that theme's own Customizer settings, including its logo, colors, and header-display choices, without changing the globally active theme. When an approved child theme exists, the plugin hides its parent theme from the public list while WordPress continues to load that parent internally.</p>
-				<h3>Automatic placement</h3>
-				<p>Select one conventional WordPress menu as the shared top navigation. Classic preview themes receive that menu in their header locations without changing their saved theme settings. Block themes continue to render their native Navigation block. When enabled, the switcher is appended after the first frontend navigation.</p>
-				<p>If a selected theme renders no usable WordPress navigation, a compact fixed top navigation displays the same menu links and switcher so the visitor can always move around the demo or switch back.</p>
+				<h3>Access and placement</h3>
+				<p>Choose whether everyone or only administrators may switch themes. The preference can last for the browser session, 1 day, 7 days, or 30 days.</p>
+				<p>The switcher can appear in the primary WordPress navigation, as a floating control, or only where you place its shortcode. You may optionally select one conventional WordPress menu as shared navigation while an alternative classic theme is active. Without that selection, every theme keeps its own navigation.</p>
+				<p>If automatic placement cannot find a standard WordPress navigation, a compact floating fallback keeps the switcher available.</p>
 				<h3>Data removal</h3>
 				<p>Settings are preserved during deactivation. Enable <strong>Delete plugin settings when the plugin is uninstalled</strong> only when you want uninstalling the plugin to remove its settings permanently.</p>
 			</section>
@@ -67,13 +68,15 @@
 			<section id="usage">
 				<h2>Visitor experience</h2>
 				<p>The switcher uses an accessible native disclosure control. A tiny dependency-free script prevents third-party theme menu scripts from intercepting its controls. A visitor opens it, selects a theme, and returns to the same clean URL rendered with that theme.</p>
-				<p>The selection is stored in the functional <code>sgfts_theme</code> cookie for up to 30 days. Selecting the site-default theme removes the cookie. One visitor's selection never activates a theme globally and does not affect other visitors.</p>
+				<p>The selection is stored in the functional <code>sgfts_theme</code> cookie for the configured period, never longer than 30 days. Selecting the site-default theme removes the cookie. One visitor's selection never activates a theme globally and does not affect other visitors.</p>
 			</section>
 
 			<section id="placement">
 				<h2>Manual placement</h2>
-				<p>If the theme uses a custom header that does not render a standard WordPress navigation, disable automatic placement and add this shortcode where the switcher should appear:</p>
+				<p>If the theme uses a custom header that does not render a standard WordPress navigation, choose manual placement and add this shortcode where the switcher should appear:</p>
 				<pre><code>[frontend_theme_switcher]</code></pre>
+				<pre><code>[frontend_theme_switcher display="list"]
+[frontend_theme_switcher display="select"]</code></pre>
 				<p>You can use a Shortcode block in the Site Editor, a page builder shortcode element, or a widget area that processes shortcodes.</p>
 			</section>
 

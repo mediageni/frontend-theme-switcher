@@ -3,7 +3,7 @@
  * Plugin Name:       Frontend Theme Switcher
  * Plugin URI:        https://github.com/mediageni/frontend-theme-switcher
  * Description:       Let visitors preview approved installed themes without changing the site's active theme.
- * Version:           1.0.2
+ * Version:           1.1.0
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Author:            MediaGeni
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SGFTS_VERSION', '1.0.2' );
+define( 'SGFTS_VERSION', '1.1.0' );
 define( 'SGFTS_FILE', __FILE__ );
 define( 'SGFTS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SGFTS_URL', plugin_dir_url( __FILE__ ) );

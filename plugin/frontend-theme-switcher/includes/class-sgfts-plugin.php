@@ -70,15 +70,14 @@ final class SGFTS_Plugin {
 			return;
 		}
 
-		$allowed_themes = array_keys( self::get_usable_themes() );
-		$menus          = wp_get_nav_menus();
-		$shared_menu    = empty( $menus ) ? 0 : (int) $menus[0]->term_id;
-
 		add_option(
 			self::OPTION_NAME,
 			array(
-				'allowed_themes' => $allowed_themes,
-				'shared_menu'     => $shared_menu,
+				'allowed_themes' => array(),
+				'shared_menu'     => 0,
+				'placement'       => 'auto',
+				'audience'        => 'everyone',
+				'cookie_duration' => 'month',
 				'auto_menu'      => 1,
 				'delete_data'    => 0,
 			),
@@ -93,6 +92,7 @@ final class SGFTS_Plugin {
 	private function __construct() {
 		$this->default_stylesheet = (string) get_option( 'stylesheet' );
 		$this->default_template   = (string) get_option( 'template' );
+		add_shortcode( 'frontend_theme_switcher', array( $this, 'render_shortcode' ) );
 
 		if ( $this->is_frontend_request() ) {
 			$this->prepare_theme_preview();
@@ -126,16 +126,26 @@ final class SGFTS_Plugin {
 	/**
 	 * Returns normalized plugin settings.
 	 *
-	 * @return array{allowed_themes:string[],shared_menu:int,auto_menu:int,delete_data:int}
+	 * @return array{allowed_themes:string[],shared_menu:int,placement:string,audience:string,cookie_duration:string,auto_menu:int,delete_data:int}
 	 */
 	public static function get_settings() {
 		$settings = get_option( self::OPTION_NAME, array() );
 		$settings = is_array( $settings ) ? $settings : array();
 
+		$placement = isset( $settings['placement'] ) ? sanitize_key( $settings['placement'] ) : ( empty( $settings['auto_menu'] ) ? 'manual' : 'auto' );
+		$placement = in_array( $placement, array( 'auto', 'floating', 'manual' ), true ) ? $placement : 'auto';
+		$audience  = isset( $settings['audience'] ) ? sanitize_key( $settings['audience'] ) : 'everyone';
+		$audience  = in_array( $audience, array( 'everyone', 'admins' ), true ) ? $audience : 'everyone';
+		$duration  = isset( $settings['cookie_duration'] ) ? sanitize_key( $settings['cookie_duration'] ) : 'month';
+		$duration  = in_array( $duration, array( 'session', 'day', 'week', 'month' ), true ) ? $duration : 'month';
+
 		return array(
 			'allowed_themes' => isset( $settings['allowed_themes'] ) && is_array( $settings['allowed_themes'] ) ? array_values( $settings['allowed_themes'] ) : array(),
 			'shared_menu'     => isset( $settings['shared_menu'] ) ? absint( $settings['shared_menu'] ) : 0,
-			'auto_menu'      => empty( $settings['auto_menu'] ) ? 0 : 1,
+			'placement'       => $placement,
+			'audience'        => $audience,
+			'cookie_duration' => $duration,
+			'auto_menu'      => 'auto' === $placement ? 1 : 0,
 			'delete_data'    => empty( $settings['delete_data'] ) ? 0 : 1,
 		);
 	}
@@ -158,14 +168,14 @@ final class SGFTS_Plugin {
 			return false;
 		}
 
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		if ( ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || isset( $_GET['rest_route'] ) || isset( $_GET['feed'] ) || isset( $_GET['sitemap'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only request classification.
 			return false;
 		}
 
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 		$rest_prefix = '/' . rest_get_url_prefix() . '/';
 
-		if ( false !== strpos( $request_uri, '/wp-login.php' ) || false !== strpos( $request_uri, $rest_prefix ) ) {
+		if ( false !== strpos( $request_uri, '/wp-login.php' ) || false !== strpos( $request_uri, $rest_prefix ) || preg_match( '#/(?:feed|wp-sitemap)(?:/|\\.xml|$)#i', $request_uri ) || preg_match( '#/robots\\.txt(?:\\?|$)#i', $request_uri ) ) {
 			return false;
 		}
 
@@ -181,23 +191,35 @@ final class SGFTS_Plugin {
 		$requested_theme = null;
 
 		if ( isset( $_GET[ self::QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- This request changes only the visitor's own non-sensitive display cookie.
-			$requested_theme          = sanitize_key( wp_unslash( $_GET[ self::QUERY_VAR ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$requested_theme          = sanitize_text_field( wp_unslash( $_GET[ self::QUERY_VAR ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->has_switch_request = true;
+		}
+
+		if ( ! $this->can_current_visitor_switch() ) {
+			if ( null !== $requested_theme || isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
+				$this->write_preference_cookie( '' );
+			}
+			return;
 		}
 
 		$selected_theme = '';
 
 		if ( null !== $requested_theme ) {
-			if ( 'default' !== $requested_theme && $this->is_theme_allowed( $requested_theme ) ) {
-				$selected_theme = $requested_theme;
+			if ( 'default' !== $requested_theme ) {
+				$selected_theme = $this->resolve_allowed_theme( $requested_theme );
+			}
+
+			if ( $this->default_stylesheet === $selected_theme ) {
+				$selected_theme = '';
 			}
 
 			$this->write_preference_cookie( $selected_theme );
 		} elseif ( isset( $_COOKIE[ self::COOKIE_NAME ] ) ) {
-			$cookie_theme = sanitize_key( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
+			$cookie_theme = sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) );
+			$resolved     = $this->resolve_allowed_theme( $cookie_theme );
 
-			if ( $this->is_theme_allowed( $cookie_theme ) ) {
-				$selected_theme = $cookie_theme;
+			if ( $resolved && $this->default_stylesheet !== $resolved ) {
+				$selected_theme = $resolved;
 			} else {
 				$this->write_preference_cookie( '' );
 			}
@@ -220,6 +242,7 @@ final class SGFTS_Plugin {
 		add_filter( 'stylesheet', array( $this, 'filter_stylesheet' ), 1 );
 		add_filter( 'template', array( $this, 'filter_template' ), 1 );
 		add_filter( 'pre_option_theme_mods_' . $this->default_stylesheet, array( $this, 'filter_theme_mods' ) );
+		add_filter( 'pre_update_option_theme_mods_' . $this->default_stylesheet, array( $this, 'protect_default_theme_mods' ), 10, 2 );
 
 		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
 			define( 'DONOTCACHEPAGE', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- Standard page-cache compatibility constant.
@@ -241,11 +264,10 @@ final class SGFTS_Plugin {
 		add_filter( 'wp_nav_menu_items', array( $this, 'append_to_classic_menu' ), 20, 2 );
 		add_filter( 'render_block_core/navigation', array( $this, 'append_to_navigation_block' ), 20, 2 );
 		add_action( 'wp_footer', array( $this, 'render_navigation_fallback' ), 99 );
-		add_shortcode( 'frontend_theme_switcher', array( $this, 'render_shortcode' ) );
 	}
 
 	/**
-	 * Uses one approved classic menu in every header menu location.
+	 * Uses the approved classic menu in the preview theme's primary location.
 	 *
 	 * This changes only the current frontend response. Footer and social menu
 	 * locations remain controlled by the previewed theme.
@@ -254,6 +276,10 @@ final class SGFTS_Plugin {
 	 * @return int[]
 	 */
 	public function filter_navigation_locations( $locations ) {
+		if ( ! $this->selected_stylesheet ) {
+			return $locations;
+		}
+
 		$menu_id = $this->get_shared_menu_id();
 
 		if ( ! $menu_id ) {
@@ -264,10 +290,6 @@ final class SGFTS_Plugin {
 		$registered         = array_keys( get_registered_nav_menus() );
 		$header_locations   = array_values( array_filter( $registered, array( $this, 'is_header_menu_location' ) ) );
 		$primary_location   = $this->get_primary_menu_location( $header_locations );
-
-		foreach ( $header_locations as $location ) {
-			unset( $locations[ $location ] );
-		}
 
 		if ( $primary_location ) {
 			$locations[ $primary_location ] = $menu_id;
@@ -303,9 +325,9 @@ final class SGFTS_Plugin {
 	}
 
 	/**
-	 * Returns the configured shared menu, or the first available menu.
+	 * Returns the explicitly configured shared menu.
 	 *
-	 * @return int Menu term ID, or zero when no classic menu exists.
+	 * @return int Menu term ID, or zero when no valid menu is selected.
 	 */
 	private function get_shared_menu_id() {
 		$settings = self::get_settings();
@@ -315,9 +337,7 @@ final class SGFTS_Plugin {
 			return $menu_id;
 		}
 
-		$menus = wp_get_nav_menus();
-
-		return empty( $menus ) ? 0 : (int) $menus[0]->term_id;
+		return 0;
 	}
 
 	/**
@@ -329,23 +349,33 @@ final class SGFTS_Plugin {
 	private function is_header_menu_location( $location ) {
 		$location = strtolower( (string) $location );
 
-		return false === strpos( $location, 'footer' ) && false === strpos( $location, 'social' );
+		return '' !== $location && false === strpos( $location, 'footer' ) && false === strpos( $location, 'social' ) && false === strpos( $location, 'sidebar' );
 	}
 
 	/**
-	 * Returns whether a stylesheet is installed and approved by the administrator.
+	 * Resolves a stylesheet to an installed theme approved by the administrator.
 	 *
 	 * @param string $stylesheet Theme stylesheet slug.
-	 * @return bool
+	 * @return string Resolved stylesheet slug, or an empty string when unavailable.
 	 */
-	private function is_theme_allowed( $stylesheet ) {
+	private function resolve_allowed_theme( $stylesheet ) {
 		if ( '' === $stylesheet ) {
-			return false;
+			return '';
 		}
 
 		$themes = $this->get_public_themes();
 
-		return isset( $themes[ $stylesheet ] );
+		if ( isset( $themes[ $stylesheet ] ) ) {
+			return $stylesheet;
+		}
+
+		foreach ( array_keys( $themes ) as $installed_stylesheet ) {
+			if ( 0 === strcasecmp( $installed_stylesheet, $stylesheet ) ) {
+				return $installed_stylesheet;
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -358,8 +388,34 @@ final class SGFTS_Plugin {
 	private function get_public_themes() {
 		$themes         = self::get_usable_themes();
 		$settings       = self::get_settings();
-		$public_themes  = array_intersect_key( $themes, array_flip( $settings['allowed_themes'] ) );
+		$approved       = array();
 		$hidden_parents = array();
+
+		foreach ( $settings['allowed_themes'] as $allowed_stylesheet ) {
+			if ( isset( $themes[ $allowed_stylesheet ] ) ) {
+				$approved[] = $allowed_stylesheet;
+				continue;
+			}
+
+			foreach ( array_keys( $themes ) as $installed_stylesheet ) {
+				if ( 0 === strcasecmp( $installed_stylesheet, $allowed_stylesheet ) ) {
+					$approved[] = $installed_stylesheet;
+					break;
+				}
+			}
+		}
+
+		$public_themes = array_intersect_key( $themes, array_flip( array_unique( $approved ) ) );
+		$alternatives   = array_filter(
+			array_keys( $public_themes ),
+			function ( $stylesheet ) {
+				return $stylesheet !== $this->default_stylesheet;
+			}
+		);
+
+		if ( empty( $alternatives ) ) {
+			return array();
+		}
 
 		foreach ( $public_themes as $stylesheet => $theme ) {
 			$template = $theme->get_template();
@@ -393,7 +449,7 @@ final class SGFTS_Plugin {
 			return;
 		}
 
-		$expires = '' === $stylesheet ? time() - HOUR_IN_SECONDS : time() + MONTH_IN_SECONDS;
+		$expires = '' === $stylesheet ? time() - HOUR_IN_SECONDS : $this->get_cookie_expiration();
 		$options = array(
 			'expires'  => $expires,
 			'path'     => COOKIEPATH ? COOKIEPATH : '/',
@@ -413,6 +469,38 @@ final class SGFTS_Plugin {
 		} else {
 			$_COOKIE[ self::COOKIE_NAME ] = $stylesheet;
 		}
+	}
+
+	/**
+	 * Returns the configured cookie expiry timestamp, or zero for this session.
+	 *
+	 * @return int
+	 */
+	private function get_cookie_expiration() {
+		$duration = self::get_settings()['cookie_duration'];
+
+		if ( 'session' === $duration ) {
+			return 0;
+		}
+
+		$seconds = array(
+			'day'   => DAY_IN_SECONDS,
+			'week'  => WEEK_IN_SECONDS,
+			'month' => MONTH_IN_SECONDS,
+		);
+
+		return time() + $seconds[ $duration ];
+	}
+
+	/**
+	 * Returns whether this visitor may use or see the switcher.
+	 *
+	 * @return bool
+	 */
+	private function can_current_visitor_switch() {
+		$settings = self::get_settings();
+
+		return 'everyone' === $settings['audience'] || current_user_can( 'switch_themes' );
 	}
 
 	/**
@@ -457,6 +545,23 @@ final class SGFTS_Plugin {
 	}
 
 	/**
+	 * Prevents preview-time theme code from overwriting the active theme's mods.
+	 *
+	 * Some themes write defaults while rendering their first request. Because
+	 * preview reads are mapped to another theme's mods, those values must never
+	 * be persisted under the globally active stylesheet.
+	 *
+	 * @param mixed $new_value Proposed theme-mod value.
+	 * @param mixed $old_value Stored active-theme value.
+	 * @return mixed The unchanged active-theme value.
+	 */
+	public function protect_default_theme_mods( $new_value, $old_value ) {
+		unset( $new_value );
+
+		return $old_value;
+	}
+
+	/**
 	 * Prevents visitor-specific theme HTML from entering shared page caches.
 	 *
 	 * @return void
@@ -486,6 +591,10 @@ final class SGFTS_Plugin {
 	 * @return void
 	 */
 	public function enqueue_assets() {
+		if ( ! $this->can_current_visitor_switch() || empty( $this->get_public_themes() ) ) {
+			return;
+		}
+
 		$stylesheet_path    = SGFTS_PATH . 'assets/css/frontend.css';
 		$stylesheet_version = file_exists( $stylesheet_path ) ? (string) filemtime( $stylesheet_path ) : SGFTS_VERSION;
 		$script_path        = SGFTS_PATH . 'assets/js/frontend.js';
@@ -533,16 +642,45 @@ final class SGFTS_Plugin {
 	 * @return string
 	 */
 	public function append_to_classic_menu( $items, $args ) {
-		$location = isset( $args->theme_location ) ? $args->theme_location : '';
-		$settings = self::get_settings();
+		$location  = isset( $args->theme_location ) ? $args->theme_location : '';
+		$locations = array_values( array_filter( array_keys( get_registered_nav_menus() ), array( $this, 'is_header_menu_location' ) ) );
+		$primary   = $this->get_primary_menu_location( $locations );
+		$settings  = self::get_settings();
 
-		if ( $this->is_rendering_fallback || empty( $settings['auto_menu'] ) || ! $this->is_header_menu_location( $location ) ) {
+		if ( $this->is_rendering_fallback || 'auto' !== $settings['placement'] || ! $primary || ( $location !== $primary && ! $this->is_mobile_menu_location( $location ) ) ) {
+			return $items;
+		}
+
+		$markup = $this->get_switcher_markup( 'menu-item' );
+
+		if ( '' === $markup ) {
 			return $items;
 		}
 
 		$this->automatic_switcher_rendered = true;
 
-		return $items . $this->get_switcher_markup( 'menu-item' );
+		return $items . $markup;
+	}
+
+	/**
+	 * Identifies mobile header locations that need their own reachable control.
+	 *
+	 * Themes commonly render separate desktop and mobile menu instances. The
+	 * switcher must be present in both because CSS may hide either one.
+	 *
+	 * @param string $location Registered menu location.
+	 * @return bool
+	 */
+	private function is_mobile_menu_location( $location ) {
+		$location = strtolower( (string) $location );
+
+		foreach ( array( 'mobile', 'responsive', 'drawer', 'offcanvas', 'off-canvas', 'modal', 'expanded', 'handheld' ) as $marker ) {
+			if ( false !== strpos( $location, $marker ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -565,8 +703,13 @@ final class SGFTS_Plugin {
 			return $block_content;
 		}
 
+		$markup = $this->get_switcher_markup( 'wp-block-navigation-item' );
+
+		if ( '' === $markup ) {
+			return $block_content;
+		}
+
 		$this->automatic_switcher_rendered = true;
-		$markup                            = $this->get_switcher_markup( 'wp-block-navigation-item' );
 
 		return substr_replace( $block_content, $markup, $closing_list_position, 0 );
 	}
@@ -579,7 +722,7 @@ final class SGFTS_Plugin {
 	private function should_append_automatically() {
 		$settings = self::get_settings();
 
-		return ! $this->automatic_switcher_rendered && ! empty( $settings['auto_menu'] );
+		return ! $this->automatic_switcher_rendered && 'auto' === $settings['placement'];
 	}
 
 	/**
@@ -588,12 +731,20 @@ final class SGFTS_Plugin {
 	 * @return void
 	 */
 	public function render_navigation_fallback() {
-		if ( ! $this->should_append_automatically() ) {
+		$settings = self::get_settings();
+
+		if ( 'manual' === $settings['placement'] || ( 'auto' === $settings['placement'] && ! $this->should_append_automatically() ) ) {
+			return;
+		}
+
+		$switcher_markup = $this->get_switcher_markup( '' );
+
+		if ( '' === $switcher_markup ) {
 			return;
 		}
 
 		$this->automatic_switcher_rendered = true;
-		$menu_id                           = $this->get_shared_menu_id();
+		$menu_id                           = 'auto' === $settings['placement'] ? $this->get_shared_menu_id() : 0;
 		$menu_markup                       = '';
 
 		if ( $menu_id ) {
@@ -611,34 +762,111 @@ final class SGFTS_Plugin {
 			$this->is_rendering_fallback = false;
 		}
 
-		echo '<nav class="sgfts-navigation-fallback" aria-label="' . esc_attr__( 'Preview navigation', 'frontend-theme-switcher' ) . '">' . wp_kses_post( $menu_markup ) . $this->get_switcher_markup( '' ) . '</nav>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dynamic values and assembled switcher markup are escaped.
+		echo '<nav class="sgfts-navigation-fallback" aria-label="' . esc_attr__( 'Preview navigation', 'frontend-theme-switcher' ) . '">' . wp_kses_post( $menu_markup ) . $switcher_markup . '</nav>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Dynamic values and assembled switcher markup are escaped.
 	}
 
 	/**
 	 * Renders the shortcode fallback.
 	 *
+	 * @param array|string $attributes Shortcode attributes.
 	 * @return string
 	 */
-	public function render_shortcode() {
-		return $this->get_switcher_markup( '' );
+	public function render_shortcode( $attributes = array() ) {
+		if ( ! $this->is_switcher_render_context() ) {
+			return '';
+		}
+
+		$attributes = shortcode_atts(
+			array( 'display' => 'compact' ),
+			is_array( $attributes ) ? $attributes : array(),
+			'frontend_theme_switcher'
+		);
+
+		return $this->get_switcher_markup( '', sanitize_key( $attributes['display'] ) );
+	}
+
+	/**
+	 * Prevents switcher markup from entering feeds, REST responses, or wp-admin.
+	 *
+	 * @return bool
+	 */
+	private function is_switcher_render_context() {
+		if ( is_admin() || wp_doing_ajax() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+			return false;
+		}
+
+		if ( ( function_exists( 'is_feed' ) && is_feed() ) || ( function_exists( 'wp_is_xml_request' ) && wp_is_xml_request() ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
 	 * Builds the accessible native details switcher.
 	 *
 	 * @param string $menu_class Optional class used by the surrounding navigation.
+	 * @param string $display    Compact, list, or select display.
 	 * @return string
 	 */
-	private function get_switcher_markup( $menu_class ) {
+	private function get_switcher_markup( $menu_class, $display = 'compact' ) {
+		if ( ! $this->can_current_visitor_switch() ) {
+			return '';
+		}
+
 		$themes             = self::get_usable_themes();
 		$allowed_themes     = $this->get_public_themes();
 		$current_stylesheet = $this->selected_stylesheet ? $this->selected_stylesheet : $this->default_stylesheet;
+		$display            = in_array( $display, array( 'compact', 'list', 'select' ), true ) ? $display : 'compact';
 
 		if ( empty( $allowed_themes ) ) {
 			return '';
 		}
 
 		$current_theme = isset( $themes[ $current_stylesheet ] ) ? $themes[ $current_stylesheet ] : wp_get_theme( $current_stylesheet );
+
+		if ( 'select' === $display ) {
+			$output  = '<form class="sgfts-switcher-wrap sgfts-switcher-wrap--select" method="get" action="' . esc_url( remove_query_arg( self::QUERY_VAR ) ) . '">';
+
+			foreach ( $_GET as $query_name => $query_value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query values are preserved during theme selection.
+				if ( self::QUERY_VAR === $query_name || ! is_scalar( $query_value ) ) {
+					continue;
+				}
+
+				$query_name  = sanitize_text_field( wp_unslash( (string) $query_name ) );
+				$query_value = sanitize_text_field( wp_unslash( (string) $query_value ) );
+
+				if ( '' !== $query_name ) {
+					$output .= '<input type="hidden" name="' . esc_attr( $query_name ) . '" value="' . esc_attr( $query_value ) . '">';
+				}
+			}
+
+			$output .= '<label><span class="screen-reader-text">' . esc_html__( 'Choose website theme', 'frontend-theme-switcher' ) . '</span>';
+			$output .= '<select class="sgfts-switcher-select" name="' . esc_attr( self::QUERY_VAR ) . '">';
+
+			foreach ( $allowed_themes as $stylesheet => $theme ) {
+				$query_value = $stylesheet === $this->default_stylesheet ? 'default' : $stylesheet;
+				$output     .= '<option value="' . esc_attr( $query_value ) . '"' . selected( $stylesheet, $current_stylesheet, false ) . '>' . esc_html( $theme->get( 'Name' ) ) . '</option>';
+			}
+
+			$output .= '</select></label>';
+			$output .= '<button class="sgfts-switcher-select__submit" type="submit">' . esc_html__( 'Apply theme', 'frontend-theme-switcher' ) . '</button>';
+
+			return $output . '</form>';
+		}
+
+		if ( 'list' === $display ) {
+			$output = '<div class="sgfts-switcher-wrap sgfts-switcher-wrap--list"><ul class="sgfts-switcher-list">';
+
+			foreach ( $allowed_themes as $stylesheet => $theme ) {
+				$is_current  = $stylesheet === $current_stylesheet;
+				$query_value = $stylesheet === $this->default_stylesheet ? 'default' : $stylesheet;
+				$output     .= '<li><a href="' . esc_url( add_query_arg( self::QUERY_VAR, $query_value ) ) . '"' . ( $is_current ? ' aria-current="page"' : '' ) . '>' . esc_html( $theme->get( 'Name' ) ) . '</a></li>';
+			}
+
+			return $output . '</ul></div>';
+		}
+
 		$summary_label = sprintf(
 			/* translators: %s: Current theme name. */
 			__( 'Choose website theme. Current theme: %s', 'frontend-theme-switcher' ),

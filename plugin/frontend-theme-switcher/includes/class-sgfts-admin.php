@@ -54,6 +54,9 @@ final class SGFTS_Admin {
 				'default'           => array(
 					'allowed_themes' => array(),
 					'shared_menu'     => 0,
+					'placement'       => 'auto',
+					'audience'        => 'everyone',
+					'cookie_duration' => 'month',
 					'auto_menu'      => 1,
 					'delete_data'    => 0,
 				),
@@ -65,7 +68,7 @@ final class SGFTS_Admin {
 	 * Validates all settings against installed themes.
 	 *
 	 * @param mixed $input Submitted settings.
-	 * @return array{allowed_themes:string[],shared_menu:int,auto_menu:int,delete_data:int}
+	 * @return array{allowed_themes:string[],shared_menu:int,placement:string,audience:string,cookie_duration:string,auto_menu:int,delete_data:int}
 	 */
 	public function sanitize_settings( $input ) {
 		$input            = is_array( $input ) ? $input : array();
@@ -74,18 +77,36 @@ final class SGFTS_Admin {
 
 		if ( isset( $input['allowed_themes'] ) && is_array( $input['allowed_themes'] ) ) {
 			foreach ( $input['allowed_themes'] as $stylesheet ) {
-				$stylesheet = sanitize_key( $stylesheet );
+				$stylesheet = sanitize_text_field( $stylesheet );
 
 				if ( isset( $installed_themes[ $stylesheet ] ) ) {
 					$allowed_themes[] = $stylesheet;
+					continue;
+				}
+
+				foreach ( array_keys( $installed_themes ) as $installed_stylesheet ) {
+					if ( 0 === strcasecmp( $installed_stylesheet, $stylesheet ) ) {
+						$allowed_themes[] = $installed_stylesheet;
+						break;
+					}
 				}
 			}
 		}
 
+		$placement = isset( $input['placement'] ) ? sanitize_key( $input['placement'] ) : 'auto';
+		$placement = in_array( $placement, array( 'auto', 'floating', 'manual' ), true ) ? $placement : 'auto';
+		$audience  = isset( $input['audience'] ) ? sanitize_key( $input['audience'] ) : 'everyone';
+		$audience  = in_array( $audience, array( 'everyone', 'admins' ), true ) ? $audience : 'everyone';
+		$duration  = isset( $input['cookie_duration'] ) ? sanitize_key( $input['cookie_duration'] ) : 'month';
+		$duration  = in_array( $duration, array( 'session', 'day', 'week', 'month' ), true ) ? $duration : 'month';
+
 		return array(
 			'allowed_themes' => array_values( array_unique( $allowed_themes ) ),
 			'shared_menu'     => isset( $input['shared_menu'] ) && wp_get_nav_menu_object( absint( $input['shared_menu'] ) ) ? absint( $input['shared_menu'] ) : 0,
-			'auto_menu'      => empty( $input['auto_menu'] ) ? 0 : 1,
+			'placement'       => $placement,
+			'audience'        => $audience,
+			'cookie_duration' => $duration,
+			'auto_menu'      => 'auto' === $placement ? 1 : 0,
 			'delete_data'    => empty( $input['delete_data'] ) ? 0 : 1,
 		);
 	}
@@ -114,7 +135,7 @@ final class SGFTS_Admin {
 		}
 
 		$content  = '<p>';
-		$content .= esc_html__( 'When a visitor chooses a preview theme, this site stores the selected theme identifier in a functional cookie for up to 30 days. The preference is used only to render the site for that visitor and is not transmitted to an external service.', 'frontend-theme-switcher' );
+		$content .= esc_html__( 'When a visitor chooses a preview theme, this site stores the selected theme identifier in a functional cookie for the period configured by the site administrator, up to 30 days. The preference is used only to render the site for that visitor and is not transmitted to an external service.', 'frontend-theme-switcher' );
 		$content .= '</p>';
 
 		wp_add_privacy_policy_content(
@@ -179,11 +200,30 @@ final class SGFTS_Admin {
 					</tbody>
 				</table>
 
+				<h2><?php echo esc_html__( 'Access', 'frontend-theme-switcher' ); ?></h2>
+				<p>
+					<label for="sgfts-audience"><?php echo esc_html__( 'Who may switch themes?', 'frontend-theme-switcher' ); ?></label>
+					<select id="sgfts-audience" name="<?php echo esc_attr( SGFTS_Plugin::OPTION_NAME ); ?>[audience]">
+						<option value="everyone" <?php selected( $settings['audience'], 'everyone' ); ?>><?php echo esc_html__( 'Everyone', 'frontend-theme-switcher' ); ?></option>
+						<option value="admins" <?php selected( $settings['audience'], 'admins' ); ?>><?php echo esc_html__( 'Administrators only', 'frontend-theme-switcher' ); ?></option>
+					</select>
+				</p>
+				<p>
+					<label for="sgfts-cookie-duration"><?php echo esc_html__( 'Remember a choice for', 'frontend-theme-switcher' ); ?></label>
+					<select id="sgfts-cookie-duration" name="<?php echo esc_attr( SGFTS_Plugin::OPTION_NAME ); ?>[cookie_duration]">
+						<option value="session" <?php selected( $settings['cookie_duration'], 'session' ); ?>><?php echo esc_html__( 'Browser session', 'frontend-theme-switcher' ); ?></option>
+						<option value="day" <?php selected( $settings['cookie_duration'], 'day' ); ?>><?php echo esc_html__( '1 day', 'frontend-theme-switcher' ); ?></option>
+						<option value="week" <?php selected( $settings['cookie_duration'], 'week' ); ?>><?php echo esc_html__( '7 days', 'frontend-theme-switcher' ); ?></option>
+						<option value="month" <?php selected( $settings['cookie_duration'], 'month' ); ?>><?php echo esc_html__( '30 days', 'frontend-theme-switcher' ); ?></option>
+					</select>
+				</p>
+
 				<h2><?php echo esc_html__( 'Shared top navigation', 'frontend-theme-switcher' ); ?></h2>
 				<?php if ( $menus ) : ?>
 					<p>
 						<label for="sgfts-shared-menu"><?php echo esc_html__( 'Navigation menu', 'frontend-theme-switcher' ); ?></label>
 						<select id="sgfts-shared-menu" name="<?php echo esc_attr( SGFTS_Plugin::OPTION_NAME ); ?>[shared_menu]">
+							<option value="0" <?php selected( (int) $settings['shared_menu'], 0 ); ?>><?php echo esc_html__( 'Keep each theme\'s own navigation', 'frontend-theme-switcher' ); ?></option>
 							<?php foreach ( $menus as $menu ) : ?>
 								<option value="<?php echo esc_attr( $menu->term_id ); ?>" <?php selected( (int) $settings['shared_menu'], (int) $menu->term_id ); ?>><?php echo esc_html( $menu->name ); ?></option>
 							<?php endforeach; ?>
@@ -196,17 +236,19 @@ final class SGFTS_Admin {
 
 				<h2><?php echo esc_html__( 'Placement', 'frontend-theme-switcher' ); ?></h2>
 				<p>
-					<label>
-						<input type="checkbox" name="<?php echo esc_attr( SGFTS_Plugin::OPTION_NAME ); ?>[auto_menu]" value="1" <?php checked( $settings['auto_menu'] ); ?>>
-						<?php echo esc_html__( 'Add the switcher after the items in the first frontend navigation.', 'frontend-theme-switcher' ); ?>
-					</label>
+					<label for="sgfts-placement"><?php echo esc_html__( 'Display the switcher', 'frontend-theme-switcher' ); ?></label>
+					<select id="sgfts-placement" name="<?php echo esc_attr( SGFTS_Plugin::OPTION_NAME ); ?>[placement]">
+						<option value="auto" <?php selected( $settings['placement'], 'auto' ); ?>><?php echo esc_html__( 'In the primary navigation', 'frontend-theme-switcher' ); ?></option>
+						<option value="floating" <?php selected( $settings['placement'], 'floating' ); ?>><?php echo esc_html__( 'As a floating control', 'frontend-theme-switcher' ); ?></option>
+						<option value="manual" <?php selected( $settings['placement'], 'manual' ); ?>><?php echo esc_html__( 'Manual placement only', 'frontend-theme-switcher' ); ?></option>
+					</select>
 				</p>
 				<p>
 					<?php
 					echo wp_kses_post(
 						sprintf(
 							/* translators: %s: Shortcode. */
-							__( 'For manual placement, disable automatic placement and use the %s shortcode.', 'frontend-theme-switcher' ),
+							__( 'For manual placement, use %s. Add display="list" or display="select" for another layout.', 'frontend-theme-switcher' ),
 							'<code>[frontend_theme_switcher]</code>'
 						)
 					);

@@ -11,9 +11,10 @@
 		event.stopPropagation();
 	}
 
-	document.querySelectorAll( '.sgfts-switcher' ).forEach( function ( switcher ) {
-		switcher.addEventListener( 'click', stopThemeMenuHandling );
-		switcher.addEventListener( 'pointerdown', stopThemeMenuHandling );
-		switcher.addEventListener( 'touchstart', stopThemeMenuHandling, { passive: true } );
+	document.querySelectorAll( '.sgfts-switcher__summary, .sgfts-switcher__link' ).forEach( function ( control ) {
+		control.addEventListener( 'click', stopThemeMenuHandling );
+		control.addEventListener( 'pointerdown', stopThemeMenuHandling );
+		control.addEventListener( 'touchstart', stopThemeMenuHandling, { passive: true } );
 	} );
+
 }() );

@@ -23,13 +23,25 @@ function sgfts_maybe_delete_site_settings() {
 }
 
 if ( is_multisite() ) {
-	$sgfts_site_ids = get_sites( array( 'fields' => 'ids' ) );
+	$sgfts_offset = 0;
 
-	foreach ( $sgfts_site_ids as $sgfts_site_id ) {
-		switch_to_blog( $sgfts_site_id );
-		sgfts_maybe_delete_site_settings();
-		restore_current_blog();
-	}
+	do {
+		$sgfts_site_ids = get_sites(
+			array(
+				'fields' => 'ids',
+				'number' => 100,
+				'offset' => $sgfts_offset,
+			)
+		);
+
+		foreach ( $sgfts_site_ids as $sgfts_site_id ) {
+			switch_to_blog( $sgfts_site_id );
+			sgfts_maybe_delete_site_settings();
+			restore_current_blog();
+		}
+
+		$sgfts_offset += count( $sgfts_site_ids );
+	} while ( 100 === count( $sgfts_site_ids ) );
 } else {
 	sgfts_maybe_delete_site_settings();
 }

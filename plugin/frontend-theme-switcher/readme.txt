@@ -4,7 +4,7 @@ Tags: theme switcher, theme preview, frontend, demo, showcase
 Requires at least: 6.4
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,11 +18,11 @@ You choose which installed themes are available. Visitors can then switch betwee
 
 **What it does**
 
-* Visitor-specific theme previews.
+* Visitor-specific theme previews for everyone or administrators only.
 * Administrator-approved themes only.
-* Automatic placement after the first classic or block navigation, with a fixed fallback when a theme renders no navigation.
+* Placement in the primary classic or block navigation, as a floating control, or by shortcode.
 * One shared top navigation menu across classic theme previews.
-* Shortcode fallback: `[frontend_theme_switcher]`.
+* Compact, list, and select layouts through one `[frontend_theme_switcher]` shortcode.
 * Support for parent themes, child themes, block themes, and classic themes.
 * Each preview uses its own Customizer settings without changing the globally active theme.
 * Automatic parent-theme hiding when an approved child theme is available.
@@ -44,7 +44,7 @@ I am Vidal de Wit, founder of [MediaGeni](https://mediageni.com/) and a web deve
 3. Open Settings > Theme Switcher.
 4. Select the installed themes visitors may preview.
 5. Select the WordPress menu used as shared top navigation.
-6. Keep automatic placement enabled, or place `[frontend_theme_switcher]` manually.
+6. Choose navigation, floating, or manual placement. For manual placement, use `[frontend_theme_switcher]`.
 
 == Screenshots ==
 
@@ -67,7 +67,7 @@ No. The cookie contains only an installed theme's stylesheet identifier and no d
 
 = How long is the preference stored? =
 
-Up to 30 days. Choosing the site's default theme removes the preference cookie.
+The administrator can choose the browser session, 1 day, 7 days, or 30 days. Choosing the site's default theme removes the preference cookie.
 
 = What happens when an allowed theme is removed? =
 
@@ -77,9 +77,22 @@ The stored preference is rejected and removed. WordPress continues with the site
 
 Frontend Theme Switcher does not collect personal data, add tracking, contact external services, or load third-party assets.
 
-When a visitor chooses a preview theme, the plugin stores only that installed theme's stylesheet identifier in the `sgfts_theme` functional cookie. The cookie is used solely to remember the visitor's choice in that browser and expires after 30 days. Choosing the site's default theme removes it.
+When a visitor chooses a preview theme, the plugin stores only that installed theme's stylesheet identifier in the `sgfts_theme` functional cookie. The cookie is used solely to remember the visitor's choice in that browser and expires after the period selected by the administrator, never longer than 30 days. Choosing the site's default theme removes it.
 
 == Changelog ==
+
+= 1.1.0 =
+
+* Limited automatic placement to one primary WordPress navigation and added floating and manual modes.
+* Preserved each theme's own navigation unless an administrator explicitly selects a shared menu.
+* Added everyone or administrators-only access and configurable cookie duration.
+* Added list and select layouts to the existing shortcode.
+* Kept the automatic control reachable in separate desktop and mobile menus.
+* Made the select layout work as a standard form without JavaScript.
+* Stopped new activations from exposing every installed theme before configuration.
+* Preserved case-sensitive theme directory names and kept switcher markup out of REST and XML responses.
+* Protected the active theme's Customizer settings from preview-time theme writes.
+* Improved multisite uninstall cleanup.
 
 = 1.0.2 =
 

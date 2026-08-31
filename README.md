@@ -8,8 +8,10 @@ It is developed and maintained by [Vidal de Wit](https://mediageni.com/), founde
 
 - Visitor-specific theme previews stored in a functional cookie.
 - Administrator allowlist for installed themes.
-- Automatic placement in classic and block navigation, with a fallback for themes without navigation.
-- Manual placement with `[frontend_theme_switcher]`.
+- Public or administrators-only access.
+- Primary-navigation, floating, or manual placement.
+- Compact, list, and select layouts with `[frontend_theme_switcher]`.
+- Configurable session, 1-day, 7-day, or 30-day preference duration.
 - Support for classic, block, parent, and child themes.
 - Preview-specific Customizer settings without changing the active theme.
 - Shared navigation across classic theme previews.
@@ -36,7 +38,7 @@ The `documentation` and `licensing` directories contain project documentation an
 
 ## Privacy
 
-The plugin does not collect personal data, add tracking, contact external services, or load third-party assets. It stores only the selected theme's stylesheet identifier in the `sgfts_theme` functional cookie for up to 30 days. Choosing the site's default theme removes the cookie.
+The plugin does not collect personal data, add tracking, contact external services, or load third-party assets. It stores only the selected theme's stylesheet identifier in the `sgfts_theme` functional cookie for the administrator-selected period, never longer than 30 days. Choosing the site's default theme removes the cookie.
 
 ## Security
 
