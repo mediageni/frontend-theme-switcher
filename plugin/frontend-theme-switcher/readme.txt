@@ -41,6 +41,11 @@ Development takes place in the public [GitHub repository](https://github.com/med
 5. Select the WordPress menu used as shared top navigation.
 6. Keep automatic placement enabled, or place `[frontend_theme_switcher]` manually.
 
+== Screenshots ==
+
+1. Select approved installed themes, share navigation, and configure placement from one settings screen.
+2. Visitors can preview another approved theme without changing the active theme for anyone else.
+
 == Frequently Asked Questions ==
 
 = Does this activate a theme for the whole website? =
