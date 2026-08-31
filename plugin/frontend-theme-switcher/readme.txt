@@ -12,13 +12,14 @@ Let visitors preview approved installed themes without changing the site's activ
 
 == Description ==
 
-Frontend Theme Switcher by MediaGeni adds an accessible theme selector after the first frontend navigation menu. Each visitor's choice is stored in a functional cookie and applies only to that visitor.
+Sometimes you want visitors to try a different look without changing the site for everyone. That is why I built Frontend Theme Switcher.
 
-The plugin does not activate themes globally, transmit data, load third-party assets, or expose unapproved themes. Administrators choose which installed themes are available under Settings > Theme Switcher.
+You choose which installed themes are available. Visitors can then switch between those approved themes from a simple selector on the frontend. Their choice applies only to their own browser; the active WordPress theme never changes.
 
-Features:
+**What it does**
 
 * Visitor-specific theme previews.
+* Administrator-approved themes only.
 * Automatic placement after the first classic or block navigation, with a fixed fallback when a theme renders no navigation.
 * One shared top navigation menu across classic theme previews.
 * Shortcode fallback: `[frontend_theme_switcher]`.
@@ -31,6 +32,10 @@ Features:
 * Tiny dependency-free interaction guard and no external services.
 
 Development takes place in the public [GitHub repository](https://github.com/mediageni/frontend-theme-switcher), where the complete human-readable source is available.
+
+**About the developer**
+
+I am Vidal de Wit, founder of [MediaGeni](https://mediageni.com/) and a web developer with 25 years of experience. I built and maintain Frontend Theme Switcher as a free, focused plugin for the WordPress community.
 
 == Installation ==
 
@@ -70,7 +75,9 @@ The stored preference is rejected and removed. WordPress continues with the site
 
 == Privacy ==
 
-When a visitor chooses a preview theme, the plugin stores the selected theme identifier in the `sgfts_theme` functional cookie for up to 30 days. The preference is used only to render the site for that visitor. No personal data is collected or transmitted.
+Frontend Theme Switcher does not collect personal data, add tracking, contact external services, or load third-party assets.
+
+When a visitor chooses a preview theme, the plugin stores only that installed theme's stylesheet identifier in the `sgfts_theme` functional cookie. The cookie is used solely to remember the visitor's choice in that browser and expires after 30 days. Choosing the site's default theme removes it.
 
 == Changelog ==
 

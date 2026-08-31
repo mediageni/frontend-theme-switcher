@@ -2,6 +2,8 @@
 
 Frontend Theme Switcher is a free, open-source WordPress plugin by MediaGeni. It lets visitors preview administrator-approved installed themes without changing the site's globally active theme.
 
+It is developed and maintained by [Vidal de Wit](https://mediageni.com/), founder of MediaGeni and a web developer with 25 years of experience.
+
 ## Features
 
 - Visitor-specific theme previews stored in a functional cookie.
@@ -34,7 +36,7 @@ The `documentation` and `licensing` directories contain project documentation an
 
 ## Privacy
 
-The plugin stores only the selected theme identifier in the `sgfts_theme` functional cookie for up to 30 days. It does not collect personal data or contact external services.
+The plugin does not collect personal data, add tracking, contact external services, or load third-party assets. It stores only the selected theme's stylesheet identifier in the `sgfts_theme` functional cookie for up to 30 days. Choosing the site's default theme removes the cookie.
 
 ## Security
 
