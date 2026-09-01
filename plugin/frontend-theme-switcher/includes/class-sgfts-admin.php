@@ -247,9 +247,10 @@ final class SGFTS_Admin {
 					<?php
 					echo wp_kses_post(
 						sprintf(
-							/* translators: %s: Shortcode. */
-							__( 'For manual placement, use %s. Add display="list" or display="select" for another layout.', 'frontend-theme-switcher' ),
-							'<code>[frontend_theme_switcher]</code>'
+							/* translators: 1: Compact shortcode. 2: List shortcode. */
+							__( 'For manual placement, use %1$s. To show themes as a vertical list, use %2$s.', 'frontend-theme-switcher' ),
+							'<code>[frontend_theme_switcher]</code>',
+							'<code>[frontend_theme_switcher display="list"]</code>'
 						)
 					);
 					?>

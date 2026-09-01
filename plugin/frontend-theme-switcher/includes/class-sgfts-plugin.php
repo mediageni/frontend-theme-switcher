@@ -806,7 +806,7 @@ final class SGFTS_Plugin {
 	 * Builds the accessible native details switcher.
 	 *
 	 * @param string $menu_class Optional class used by the surrounding navigation.
-	 * @param string $display    Compact, list, or select display.
+	 * @param string $display    Compact or list display.
 	 * @return string
 	 */
 	private function get_switcher_markup( $menu_class, $display = 'compact' ) {
@@ -817,43 +817,13 @@ final class SGFTS_Plugin {
 		$themes             = self::get_usable_themes();
 		$allowed_themes     = $this->get_public_themes();
 		$current_stylesheet = $this->selected_stylesheet ? $this->selected_stylesheet : $this->default_stylesheet;
-		$display            = in_array( $display, array( 'compact', 'list', 'select' ), true ) ? $display : 'compact';
+		$display            = in_array( $display, array( 'compact', 'list' ), true ) ? $display : 'compact';
 
 		if ( empty( $allowed_themes ) ) {
 			return '';
 		}
 
 		$current_theme = isset( $themes[ $current_stylesheet ] ) ? $themes[ $current_stylesheet ] : wp_get_theme( $current_stylesheet );
-
-		if ( 'select' === $display ) {
-			$output  = '<form class="sgfts-switcher-wrap sgfts-switcher-wrap--select" method="get" action="' . esc_url( remove_query_arg( self::QUERY_VAR ) ) . '">';
-
-			foreach ( $_GET as $query_name => $query_value ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query values are preserved during theme selection.
-				if ( self::QUERY_VAR === $query_name || ! is_scalar( $query_value ) ) {
-					continue;
-				}
-
-				$query_name  = sanitize_text_field( wp_unslash( (string) $query_name ) );
-				$query_value = sanitize_text_field( wp_unslash( (string) $query_value ) );
-
-				if ( '' !== $query_name ) {
-					$output .= '<input type="hidden" name="' . esc_attr( $query_name ) . '" value="' . esc_attr( $query_value ) . '">';
-				}
-			}
-
-			$output .= '<label><span class="screen-reader-text">' . esc_html__( 'Choose website theme', 'frontend-theme-switcher' ) . '</span>';
-			$output .= '<select class="sgfts-switcher-select" name="' . esc_attr( self::QUERY_VAR ) . '">';
-
-			foreach ( $allowed_themes as $stylesheet => $theme ) {
-				$query_value = $stylesheet === $this->default_stylesheet ? 'default' : $stylesheet;
-				$output     .= '<option value="' . esc_attr( $query_value ) . '"' . selected( $stylesheet, $current_stylesheet, false ) . '>' . esc_html( $theme->get( 'Name' ) ) . '</option>';
-			}
-
-			$output .= '</select></label>';
-			$output .= '<button class="sgfts-switcher-select__submit" type="submit">' . esc_html__( 'Apply theme', 'frontend-theme-switcher' ) . '</button>';
-
-			return $output . '</form>';
-		}
 
 		if ( 'list' === $display ) {
 			$output = '<div class="sgfts-switcher-wrap sgfts-switcher-wrap--list"><ul class="sgfts-switcher-list">';

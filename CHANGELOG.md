@@ -5,11 +5,10 @@
 - Limited automatic placement to one primary WordPress navigation and added floating and manual modes.
 - Preserved each theme's own navigation unless a shared menu is explicitly selected.
 - Added public or administrators-only switching and session, 1-day, 7-day, and 30-day cookie durations.
-- Added compact, list, and select layouts through the existing shortcode.
+- Added compact dropdown and vertical list layouts through the existing shortcode.
 - Anchored each compact panel to its own control instead of the surrounding content width.
 - Replaced pill-shaped controls with restrained, theme-neutral corners and shadows.
 - Kept automatic controls reachable in separate desktop and mobile menu instances.
-- Made the select layout work as a standard form without JavaScript.
 - Made new activations opt-in by leaving all alternative themes unapproved.
 - Preserved case-sensitive theme directory names and excluded REST, feeds, and XML output.
 - Protected the active theme's Customizer settings from preview-time writes by alternative themes.

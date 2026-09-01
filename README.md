@@ -10,7 +10,7 @@ It is developed and maintained by [Vidal de Wit](https://mediageni.com/), founde
 - Administrator allowlist for installed themes.
 - Public or administrators-only access.
 - Primary-navigation, floating, or manual placement.
-- Compact, list, and select layouts with `[frontend_theme_switcher]`.
+- Compact dropdown and vertical list layouts with `[frontend_theme_switcher]`.
 - Configurable session, 1-day, 7-day, or 30-day preference duration.
 - Support for classic, block, parent, and child themes.
 - Preview-specific Customizer settings without changing the active theme.

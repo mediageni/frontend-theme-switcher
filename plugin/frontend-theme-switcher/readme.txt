@@ -22,7 +22,7 @@ You choose which installed themes are available. Visitors can then switch betwee
 * Administrator-approved themes only.
 * Placement in the primary classic or block navigation, as a floating control, or by shortcode.
 * One shared top navigation menu across classic theme previews.
-* Compact, list, and select layouts through one `[frontend_theme_switcher]` shortcode.
+* Compact dropdown and vertical list layouts through one `[frontend_theme_switcher]` shortcode.
 * Support for parent themes, child themes, block themes, and classic themes.
 * Each preview uses its own Customizer settings without changing the globally active theme.
 * Automatic parent-theme hiding when an approved child theme is available.
@@ -86,11 +86,10 @@ When a visitor chooses a preview theme, the plugin stores only that installed th
 * Limited automatic placement to one primary WordPress navigation and added floating and manual modes.
 * Preserved each theme's own navigation unless an administrator explicitly selects a shared menu.
 * Added everyone or administrators-only access and configurable cookie duration.
-* Added list and select layouts to the existing shortcode.
+* Added a vertical list layout to the existing shortcode.
 * Anchored each compact panel to its own control instead of the surrounding content width.
 * Replaced pill-shaped controls with restrained, theme-neutral corners and shadows.
 * Kept the automatic control reachable in separate desktop and mobile menus.
-* Made the select layout work as a standard form without JavaScript.
 * Stopped new activations from exposing every installed theme before configuration.
 * Preserved case-sensitive theme directory names and kept switcher markup out of REST and XML responses.
 * Protected the active theme's Customizer settings from preview-time theme writes.
